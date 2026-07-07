@@ -1,0 +1,750 @@
+/* ============================================================
+   GAMESCLUB — SPLENDOR DESIGN REFERENCE
+   Extracted from approved mockup (v7)
+   Use this as the visual reference for the game board.
+   ============================================================ */
+
+/* FONTS */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
+
+/* ── ROOT COLORS ── */
+:root {
+  --bg-primary: #1a3a6b;        /* Main game background */
+  --bg-dark: #0f2040;           /* Darker panels, top bars */
+  --bg-panel: rgba(0,0,0,0.28); /* Player panel background */
+  --bg-card: #132436;           /* Card background */
+  --border-panel: #2a5090;      /* Panel borders */
+
+  /* Gem colors — use for tokens, cost circles, coin circles */
+  --gem-diamond: #a09070;       /* Diamond/White */
+  --gem-diamond-border: #c8b080;
+  --gem-sapphire: #2060a0;      /* Sapphire/Blue */
+  --gem-emerald: #1a7a3a;       /* Emerald/Green */
+  --gem-ruby: #9a2020;          /* Ruby/Red */
+  --gem-onyx: #303030;          /* Onyx/Black */
+  --gem-onyx-border: #555555;
+  --gem-gold: #c09020;          /* Gold wildcard */
+  --gem-gold-border: #f0c030;
+
+  /* Bought card slot colors (darker shade of gem color for rectangles) */
+  --card-diamond: #7a6840;
+  --card-sapphire: #1a5090;
+  --card-emerald: #1a5a28;
+  --card-ruby: #7a1818;
+  --card-onyx: #282828;
+
+  /* Text */
+  --text-primary: #c8e0f0;
+  --text-muted: #6a9fd4;
+  --text-gold: #f0d080;
+  --text-white: rgba(255,255,255,0.9);
+
+  /* Active turn */
+  --active-green: #90ff70;
+  --active-green-text: #0a2010;
+
+  /* Score / UI */
+  --score-bg: #2a5090;
+  --score-border: #4a7ab0;
+}
+
+/* ── LAYOUT ──
+   Grid: players(148px) | board(1fr) | nobles(58px) | gems(64px)
+   Bottom bar spans full width
+*/
+.game-board {
+  display: grid;
+  grid-template-columns: 148px 1fr 58px 64px;
+  grid-template-rows: 1fr auto;
+  min-height: 420px;
+  background: var(--bg-primary);
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* ── PLAYER PANELS (left column) ── */
+.players-col {
+  grid-column: 1;
+  grid-row: 1;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.player-panel {
+  background: var(--bg-panel);
+  border-radius: 8px;
+  padding: 8px 9px;
+  border: 2px solid transparent;
+  position: relative;
+}
+
+.player-panel.active-player {
+  border-color: var(--active-green);
+  box-shadow: 0 0 0 2px rgba(144,255,112,0.2);
+}
+
+/* Player header row: avatar | name | score bubble */
+.pp-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.pp-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #acd;
+  flex-shrink: 0;
+}
+
+.pp-name {
+  font-size: 12px;
+  color: var(--text-primary);
+  font-weight: 500;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pp-score {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--score-bg);
+  border: 2px solid var(--score-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--text-gold);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ── COLOR COLUMNS: rectangle (cards bought) above circle (coins) ──
+   CRITICAL DESIGN RULE: each gem color is a vertical column.
+   Rectangle on top = number of cards bought of that color.
+   Circle below = number of coins/gems of that color.
+   Same color, aligned vertically. This lets players see
+   total purchasing power per color at a glance.
+*/
+.color-cols {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 5px;
+}
+
+.color-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+/* Rectangle = cards bought. Filled with card color. Number inside. */
+.cc-rect {
+  width: 100%;
+  height: 20px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.92);
+}
+
+/* Circle = coins held. Filled with gem color. Number inside. */
+.cc-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+  border: 1.5px solid rgba(255,255,255,0.15);
+}
+
+/* Player panel footer: gold coins | reserved count */
+.pp-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.pp-gold {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+  color: var(--text-gold);
+}
+
+.pp-gold-circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--gem-gold);
+  border: 1.5px solid var(--gem-gold-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+}
+
+.pp-reserved {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+/* Turn indicator badge (top-right corner of active player's panel) */
+.turn-indicator {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  background: var(--active-green);
+  color: var(--active-green-text);
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 0 6px 0 6px;
+}
+
+/* ── BOARD CARDS (center column) ── */
+.board-col {
+  grid-column: 2;
+  grid-row: 1;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.card-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* Face-down deck with tier numeral */
+.tier-deck {
+  width: 48px;
+  height: 72px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(255,255,255,0.15);
+  flex-shrink: 0;
+}
+
+.tier-numeral {
+  font-size: 20px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.35);
+  line-height: 1;
+}
+
+.tier-count {
+  font-size: 8px;
+  color: rgba(255,255,255,0.25);
+}
+
+/* Face-up development card */
+.card {
+  width: 66px;
+  height: 72px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  border: 2px solid transparent;
+  transition: border-color 0.15s, transform 0.1s;
+}
+
+.card:hover { transform: translateY(-2px); }
+.card.highlighted { border-color: var(--text-gold); transform: translateY(-3px); }
+
+/* Card top section: prestige points (circle) + gem produced (small circle) */
+.card-top {
+  flex: 0 0 42px;
+  border-radius: 4px 4px 0 0;
+  padding: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+/* Tier background gradients */
+.card-top.tier-3 { background: linear-gradient(135deg, #1a3a6b, #0d2040); }
+.card-top.tier-2 { background: linear-gradient(135deg, #1e3d2c, #0f2418); }
+.card-top.tier-1 { background: linear-gradient(135deg, #2d1e10, #1a0f06); }
+
+.card-pts {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+  background: rgba(0,0,0,0.35);
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Small circle top-right showing gem color this card produces */
+.card-gem-badge {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.4);
+}
+
+/* Card cost section at bottom */
+.card-costs {
+  background: rgba(0,0,0,0.45);
+  border-radius: 0 0 4px 4px;
+  flex: 1;
+  padding: 3px 4px;
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Cost circle: filled with gem color, number inside */
+.cost-circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+  flex-shrink: 0;
+}
+
+/* Card action popup (buy / reserve) appears above card on click */
+.card-actions {
+  display: none;
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-dark);
+  border: 1.5px solid var(--text-gold);
+  border-radius: 8px;
+  padding: 5px;
+  z-index: 20;
+  gap: 4px;
+  white-space: nowrap;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+}
+
+.card-actions.show { display: flex; }
+
+.ca-btn {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  border: none;
+}
+
+.ca-buy { background: var(--text-gold); color: var(--bg-dark); }
+.ca-buy:hover { background: #ffe090; }
+.ca-reserve { background: transparent; border: 1px solid #4a7ab0; color: #8ab8d8; }
+.ca-reserve:hover { background: rgba(74,122,176,0.2); }
+
+/* Arrow pointing down from popup to card */
+.ca-arrow {
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 7px;
+  background: var(--text-gold);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+/* ── NOBLE TILES (third column) ── */
+.nobles-col {
+  grid-column: 3;
+  grid-row: 1;
+  padding: 8px 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+}
+
+.noble-tile {
+  width: 54px;
+  background: rgba(20,60,120,0.6);
+  border: 1.5px solid #8a7040;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 5px 4px;
+}
+
+.noble-pts {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-gold);
+}
+
+.noble-req {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Noble requirements use RECTANGLES (not circles) because
+   they require bought cards (rectangles), not coins (circles) */
+.noble-rect {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ── GEM TOKENS (rightmost column) ── */
+.gems-col {
+  grid-column: 4;
+  grid-row: 1;
+  padding: 8px 6px 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+}
+
+.gem-token {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  border: 3px solid rgba(255,255,255,0.15);
+  transition: transform 0.1s, border-color 0.1s;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.gem-token:hover { transform: scale(1.08); }
+
+/* Highlighted when selected this turn */
+.gem-token.picking {
+  border-color: var(--text-gold);
+  box-shadow: 0 0 8px rgba(240,208,128,0.4);
+}
+
+.gem-token.depleted {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ── BOTTOM BAR ── */
+.bottom-bar {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  background: rgba(0,0,0,0.3);
+  border-top: 2px solid rgba(255,215,0,0.3);
+  display: flex;
+  align-items: stretch;
+  min-height: 100px;
+}
+
+/* Zone 1: Gems picked this turn (left) */
+.zone-hand {
+  width: 150px;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.zone-label {
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 2px;
+}
+
+.hand-gems {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+  min-height: 32px;
+}
+
+/* Gem picked this turn — click to return to pool */
+.hand-gem {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.3);
+  transition: transform 0.1s;
+  flex-shrink: 0;
+}
+
+.hand-gem:hover {
+  transform: scale(0.85);
+  border-color: var(--text-gold);
+}
+
+/* Zone 2: My cards + gems + reserved (center) */
+.zone-center {
+  flex: 1;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  padding: 8px 14px;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+/* My color columns — same rect+circle pattern as opponent panels
+   Rectangle (cards bought) above circle (coins), per color */
+.my-color-cols {
+  display: flex;
+  gap: 4px;
+}
+
+.my-color-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.my-cc-rect {
+  width: 24px;
+  height: 22px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.92);
+}
+
+.my-cc-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+  border: 1.5px solid rgba(255,255,255,0.15);
+}
+
+.gem-total {
+  font-size: 9px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 1px;
+}
+
+/* Reserved cards mini view */
+.reserved-cards {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.reserved-card {
+  width: 38px;
+  height: 56px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Zone 3: Score + End Turn (right) */
+.zone-right {
+  width: 120px;
+  flex-shrink: 0;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.score-badge {
+  background: var(--score-bg);
+  border: 2px solid var(--score-border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: var(--text-gold);
+  font-weight: 700;
+}
+
+.end-turn-btn {
+  background: rgba(200,180,100,0.15);
+  border: 2px solid #8a7040;
+  border-radius: 16px;
+  padding: 9px 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #d0b060;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  text-align: center;
+  transition: all 0.15s;
+  width: 100%;
+}
+
+.end-turn-btn.active {
+  background: rgba(200,180,100,0.25);
+  border-color: var(--text-gold);
+  color: var(--text-gold);
+}
+
+.end-turn-btn.active:hover {
+  background: rgba(200,180,100,0.4);
+}
+
+.end-turn-btn.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── OVERLAYS ── */
+.game-dimmer {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 25;
+  pointer-events: none;
+}
+
+.game-dimmer.show { display: block; }
+
+.turn-banner {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  background: rgba(10,30,60,0.93);
+  border: 2px solid var(--text-gold);
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-gold);
+  letter-spacing: 1px;
+  z-index: 30;
+  text-align: center;
+  pointer-events: none;
+}
+
+.turn-banner.show { display: block; }
+
+/* ============================================================
+   KEY DESIGN RULES SUMMARY FOR CLAUDE CODE:
+
+   1. CIRCLES = coins/gems. RECTANGLES = bought development cards.
+      Never mix these up.
+
+   2. COLOR COLUMNS: In every player panel and in the bottom bar,
+      each gem color must be a vertical column with the rectangle
+      (cards bought) directly above the circle (coins). Same color.
+      This lets players calculate purchasing power at a glance.
+
+   3. NOBLE REQUIREMENTS use noble-rect (rectangles) because nobles
+      require bought cards, not coins.
+
+   4. CARD COSTS use cost-circle (circles) because cards cost coins.
+
+   5. GEM TOKEN colors:
+      Diamond: #a09070 (border #c8b080)
+      Sapphire: #2060a0
+      Emerald:  #1a7a3a
+      Ruby:     #9a2020
+      Onyx:     #303030 (border #555555)
+      Gold:     #c09020 (border #f0c030)
+
+   6. BOUGHT CARD SLOT colors (darker, for rectangles):
+      Diamond: #7a6840
+      Sapphire: #1a5090
+      Emerald:  #1a5a28
+      Ruby:     #7a1818
+      Onyx:     #282828
+
+   7. Active player panel gets border: #90ff70 green glow.
+      "YOUR TURN" badge top-right of their panel.
+
+   8. Bottom bar zones:
+      Left (150px):  gems picked this turn, click to return
+      Center (flex): my color columns + reserved cards
+      Right (120px): score badge + End Turn button
+   ============================================================ */
