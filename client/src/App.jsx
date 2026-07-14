@@ -1,11 +1,40 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useWebSocket } from './hooks/useWebSocket';
 import HomeScreen  from './screens/HomeScreen';
 import LobbyScreen from './screens/LobbyScreen';
 import GameBoard   from './game/GameBoard';
 
+const SESSION_KEY = 'gamesclub_session';
+
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveSession(roomId, playerId) {
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ roomId, playerId }));
+  } catch {
+    // localStorage unavailable (private browsing, etc.) — reconnect just won't persist
+  }
+}
+
+function clearSession() {
+  try {
+    localStorage.removeItem(SESSION_KEY);
+  } catch {
+    // ignore
+  }
+}
+
 export default function App() {
-  const [screen,      setScreen]      = useState('home'); // 'home' | 'lobby' | 'game'
+  const initialSession = useRef(loadSession());
+
+  const [screen,      setScreen]      = useState(initialSession.current ? 'connecting' : 'home'); // 'home' | 'connecting' | 'lobby' | 'game'
   const [roomId,      setRoomId]      = useState(null);
   const [playerId,    setPlayerId]    = useState(null);
   const [players,     setPlayers]     = useState([]);
@@ -25,6 +54,7 @@ export default function App() {
         setIsHost(true);
         setTurnDurationMs(msg.turnDurationMs ?? 60000);
         setScreen('lobby');
+        saveSession(msg.roomId, msg.playerId);
         break;
 
       case 'room_joined':
@@ -35,6 +65,29 @@ export default function App() {
         setIsHost(false);
         setTurnDurationMs(msg.turnDurationMs ?? 60000);
         setScreen('lobby');
+        saveSession(msg.roomId, msg.playerId);
+        break;
+
+      // Response to a rejoin_room attempt — restores whichever screen we were on.
+      case 'rejoined':
+        setRoomId(msg.roomId);
+        setPlayerId(msg.playerId);
+        setPlayers(msg.players ?? [msg.playerId]);
+        setPlayerNames(msg.names ?? {});
+        setIsHost(!!msg.isHost);
+        setTurnDurationMs(msg.turnDurationMs ?? 60000);
+        if (msg.state) {
+          setGameState(msg.state);
+          setScreen('game');
+        } else {
+          setScreen('lobby');
+        }
+        saveSession(msg.roomId, msg.playerId);
+        break;
+
+      case 'rejoin_failed':
+        clearSession();
+        setScreen('home');
         break;
 
       case 'timer_set':
@@ -69,7 +122,16 @@ export default function App() {
     }
   }, []);
 
-  const { send } = useWebSocket(handleMessage);
+  // Fires on every successful connection (first load AND automatic
+  // reconnects after a drop) — if we have a saved session, reclaim it.
+  const handleOpen = useCallback(() => {
+    const session = loadSession();
+    if (session?.roomId && session?.playerId) {
+      send('rejoin_room', session);
+    }
+  }, []);
+
+  const { send } = useWebSocket(handleMessage, handleOpen);
 
   // Called by HomeScreen when the player locks in their name
   const handleSetName = useCallback((name) => {
@@ -80,6 +142,10 @@ export default function App() {
   return (
     <>
       {error && <div style={styles.errorBanner}>{error}</div>}
+
+      {screen === 'connecting' && (
+        <div style={styles.connectingPage}>Reconnecting…</div>
+      )}
 
       {screen === 'home' && (
         <HomeScreen send={send} onSetName={handleSetName} />
@@ -122,5 +188,13 @@ const styles = {
     fontSize:     '0.9rem',
     zIndex:       1000,
     boxShadow:    '0 4px 12px rgba(0,0,0,0.3)',
+  },
+  connectingPage: {
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#8892a4',
+    fontSize: '1.1rem',
   },
 };

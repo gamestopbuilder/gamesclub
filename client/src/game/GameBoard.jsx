@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './game.css';
-import { playerLabel, GEM_COLORS, GEM_ORDER } from './constants';
+import { GEM_COLORS, GEM_ORDER } from './constants';
 import PlayerPanel from './PlayerPanel';
 import BoardCards  from './BoardCards';
 import NoblesCol   from './NoblesCol';
@@ -237,7 +237,7 @@ export default function GameBoard({ gameState, myPlayerId, send }) {
             <div className="game-over-winner">
               {winner.id === myPlayerId
                 ? '🏆 You win!'
-                : `${playerLabel(winner.id, myPlayerId)} wins!`}
+                : `${winner.name} wins!`}
             </div>
             <ul className="scores-list">
               {gameState.players
@@ -245,7 +245,7 @@ export default function GameBoard({ gameState, myPlayerId, send }) {
                 .sort((a, b) => b.score - a.score)
                 .map(p => (
                   <li key={p.id} className="score-item">
-                    <span>{playerLabel(p.id, myPlayerId)}</span>
+                    <span>{p.name}{p.id === myPlayerId ? ' (You)' : ''}</span>
                     <span style={{ color: '#f0d080', fontWeight: 700 }}>
                       {p.score} pts
                     </span>

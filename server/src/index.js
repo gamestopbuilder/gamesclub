@@ -95,7 +95,7 @@ function handleTimeout(roomId) {
 }
 
 wss.on('connection', (ws) => {
-  const playerId = uuidv4();
+  let playerId = uuidv4(); // reassigned on a successful rejoin_room, reclaiming a prior identity
   let currentRoom = null;
 
   console.log(`Player connected: ${playerId}`);
@@ -119,6 +119,7 @@ wss.on('connection', (ws) => {
           players: new Map([[playerId, ws]]),
           names:   new Map([[playerId, hostName]]),
           state:   {},
+          hostId:  playerId,
           turnDurationMs: DEFAULT_TIMER_MS,
           timerHandle: null,
         };
@@ -138,8 +139,12 @@ wss.on('connection', (ws) => {
           ws.send(JSON.stringify({ type: 'error', message: 'Room not found' }));
           break;
         }
+        if (room.state && room.state.phase) {
+          ws.send(JSON.stringify({ type: 'error', message: 'This game has already started' }));
+          break;
+        }
         const joinerName    = (payload?.name || '').trim() || `Player-${playerId.slice(0, 4)}`;
-        const existingPlayers = [...room.players.keys()];
+        const existingPlayers = [...room.names.keys()];
         room.players.set(playerId, ws);
         room.names.set(playerId, joinerName);
         currentRoom = roomId;
@@ -165,8 +170,7 @@ wss.on('connection', (ws) => {
       case 'set_timer': {
         const room = rooms.get(currentRoom);
         if (!room) break;
-        const hostId = [...room.players.keys()][0];
-        if (playerId !== hostId) {
+        if (playerId !== room.hostId) {
           ws.send(JSON.stringify({ type: 'error', message: 'Only the host can set the turn timer' }));
           break;
         }
@@ -187,7 +191,7 @@ wss.on('connection', (ws) => {
           ws.send(JSON.stringify({ type: 'error', message: 'Need at least 2 players to start' }));
           break;
         }
-        const playerIds   = [...room.players.keys()];
+        const playerIds   = [...room.names.keys()];
         const playerNames = Object.fromEntries(room.names);
         room.state = createGame(playerIds, playerNames, room.turnDurationMs);
         scheduleTimer(currentRoom);
@@ -213,6 +217,36 @@ wss.on('connection', (ws) => {
         break;
       }
 
+      // Reclaim a prior seat after a dropped connection or page reload —
+      // the client presents the roomId/playerId it had before disconnecting.
+      case 'rejoin_room': {
+        const { roomId, playerId: oldPlayerId } = payload || {};
+        const room = rooms.get(roomId);
+        if (!room || !oldPlayerId || !room.names.has(oldPlayerId)) {
+          ws.send(JSON.stringify({ type: 'rejoin_failed', message: 'That session is no longer valid' }));
+          break;
+        }
+        playerId = oldPlayerId;
+        room.players.set(playerId, ws);
+        currentRoom = roomId;
+        ws.send(JSON.stringify({
+          type: 'rejoined',
+          roomId,
+          playerId,
+          isHost: playerId === room.hostId,
+          players: [...room.names.keys()],
+          names: Object.fromEntries(room.names),
+          turnDurationMs: room.turnDurationMs,
+          state: (room.state && room.state.phase) ? room.state : null,
+        }));
+        room.players.forEach((client, pid) => {
+          if (pid !== playerId && client.readyState === client.OPEN) {
+            client.send(JSON.stringify({ type: 'player_reconnected', playerId }));
+          }
+        });
+        break;
+      }
+
       default:
         ws.send(JSON.stringify({ type: 'error', message: `Unknown message type: ${type}` }));
     }
@@ -222,7 +256,9 @@ wss.on('connection', (ws) => {
     console.log(`Player disconnected: ${playerId}`);
     if (currentRoom) {
       const room = rooms.get(currentRoom);
-      if (room) {
+      // Only clean up if this socket is still the one on record for playerId —
+      // a stale close firing after a reconnect must not evict the new connection.
+      if (room && room.players.get(playerId) === ws) {
         room.players.delete(playerId);
         broadcast(room, { type: 'player_left', playerId });
         if (room.players.size === 0) {
