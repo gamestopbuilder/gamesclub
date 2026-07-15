@@ -1,15 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './game.css';
 import { GEM_COLORS, GEM_ORDER } from './constants';
+import { useViewportFit } from '../hooks/useViewportFit';
 import PlayerPanel from './PlayerPanel';
 import BoardCards  from './BoardCards';
 import NoblesCol   from './NoblesCol';
 import GemsCol     from './GemsCol';
 import BottomBar   from './BottomBar';
+import RotateDevicePrompt from './RotateDevicePrompt';
 
 const DISCARD_COLORS = [...GEM_ORDER, 'gold'];
 
+// Reference size the whole board is designed at — every element (player
+// panels, cards, nobles, hand) scales together as one unit to fit whatever
+// viewport is actually available, so nothing is ever cropped or scrolled.
+const DESIGN_WIDTH = 930;
+const DESIGN_HEIGHT = 750;
+
 export default function GameBoard({ gameState, myPlayerId, send }) {
+  const { scale, isPortrait } = useViewportFit(DESIGN_WIDTH, DESIGN_HEIGHT);
   const [pendingGems,   setPendingGems]   = useState([]); // gems picked this turn (not yet sent)
   const [selectedCardId, setSelectedCardId] = useState(null);
   const [now, setNow] = useState(Date.now());
@@ -130,14 +139,20 @@ export default function GameBoard({ gameState, myPlayerId, send }) {
   }, [send]);
 
   if (!myPlayer) return null;
+  if (isPortrait) return <RotateDevicePrompt />;
 
   const winner = gameState.winner
     ? gameState.players.find(p => p.id === gameState.winner)
     : null;
 
   return (
-    // Clicking the board background deselects any selected card
-    <div className="game-board" onClick={() => setSelectedCardId(null)}>
+    <div className="game-viewport">
+    {/* Clicking the board background deselects any selected card */}
+    <div
+      className="game-board"
+      onClick={() => setSelectedCardId(null)}
+      style={{ transform: `scale(${scale})` }}
+    >
 
       {/* ── Column 1: Player panels ── */}
       <div className="players-col">
@@ -255,6 +270,7 @@ export default function GameBoard({ gameState, myPlayerId, send }) {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

@@ -43,11 +43,29 @@
    Grid: players(180px) | board(1fr) | nobles(110px) | gems(80px)
    Bottom bar spans all 4 columns.
 */
+/* Fills the real viewport and centers the fixed-size design canvas below,
+   whatever size it ends up scaled to. */
+.game-viewport {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+
+/* Fixed reference canvas — never resizes itself. Its parent (.game-viewport)
+   applies a single `transform: scale(...)` (computed in JS from the real
+   viewport) so every element inside scales together as one unit. */
 .game-board {
   display: grid;
   grid-template-columns: 180px 1fr 110px 80px;
   grid-template-rows: 1fr auto;
-  height: 100vh;
+  width: 930px;
+  height: 750px;
+  flex-shrink: 0;
+  transform-origin: center center;
   overflow: hidden;
   background: var(--bg-primary);
   font-family: 'DM Sans', sans-serif;
