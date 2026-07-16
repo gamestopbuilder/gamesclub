@@ -6,9 +6,9 @@
 
 /* ── ROOT COLORS (unchanged from design reference) ── */
 :root {
-  --bg-primary:    #1a3a6b;
+  --bg-primary:    #ffffff;
   --bg-dark:       #0f2040;
-  --bg-panel:      rgba(0,0,0,0.28);
+  --bg-panel:      #17233a;
   --bg-card:       #132436;
   --border-panel:  #2a5090;
 
@@ -276,7 +276,7 @@
 .tier-deck {
   width: 64px;
   height: 144px;
-  background: rgba(0,0,0,0.3);
+  background: var(--bg-panel);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -320,7 +320,7 @@
 }
 
 .card:hover         { transform: translateY(-4px); }
-.card.highlighted   { border-color: var(--text-gold); transform: translateY(-5px); }
+.card.highlighted   { border-color: var(--text-gold); transform: translateY(-5px); z-index: 30; }
 .card.can-afford    { border-color: rgba(144,255,112,0.45); }
 
 /* Card top: tier gradient, prestige pts star, gem-produced badge */
@@ -370,7 +370,7 @@
 
 /* Card cost section — CIRCLES only (coins, not rectangles) */
 .card-costs {
-  background: rgba(0,0,0,0.48);
+  background: var(--bg-dark);
   border-radius: 0 0 6px 6px;
   flex: 1;
   padding: 5px 6px;
@@ -502,15 +502,22 @@
   color: rgba(255,255,255,0.9);
 }
 
-/* ── GEM TOKENS ── */
+/* ── GEM TOKENS ──
+   Own panel background (independent of the page canvas) so every gem
+   color — including lighter ones like diamond — keeps its border/edge
+   definition regardless of what the surrounding page looks like.
+── */
 .gems-col {
   grid-column: 4;
   grid-row: 1;
-  padding: 12px 8px 12px 0;
+  margin: 12px 12px 12px 0;
+  padding: 12px 8px;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
   align-items: center;
+  background: var(--bg-panel);
+  border-radius: 14px;
 }
 
 .gem-token {
@@ -544,7 +551,7 @@
 .bottom-bar {
   grid-column: 1 / -1;
   grid-row: 2;
-  background: rgba(0,0,0,0.3);
+  background: var(--bg-panel);
   border-top: 2px solid rgba(255,215,0,0.3);
   display: flex;
   align-items: stretch;

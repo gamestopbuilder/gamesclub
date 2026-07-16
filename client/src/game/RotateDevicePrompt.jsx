@@ -17,8 +17,8 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#1a3a6b',
-    color: '#c8e0f0',
+    background: '#ffffff',
+    color: '#334155',
     textAlign: 'center',
     padding: '24px',
     fontFamily: "'DM Sans', sans-serif",
@@ -30,12 +30,12 @@ const styles = {
   title: {
     fontSize: '1.3rem',
     fontWeight: 700,
-    color: '#f0d080',
+    color: '#b8860b',
     marginBottom: '8px',
   },
   sub: {
     fontSize: '0.95rem',
-    color: '#6a9fd4',
+    color: '#64748b',
     maxWidth: '280px',
   },
 };
